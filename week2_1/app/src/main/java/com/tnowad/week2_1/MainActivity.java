@@ -29,12 +29,12 @@ public class MainActivity extends AppCompatActivity {
 
         statusText = findViewById(R.id.statusText);
 
-        if(isNetWorkAvailable()) {
-            new CheckInternetTask().execute("https://www.google.com");
-        } else {
-            statusText.setText("No Internet!");
-        }
 
+        if(isNetworkAvailable()){
+            new CheckInternetTask().execute("https://goohjhjhgle.com");
+        }else{
+            statusText.setText("Khong the ket noi mang");
+        }
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -42,38 +42,40 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private boolean isNetWorkAvailable() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo !=null && activeNetworkInfo.isConnected();
+
+
+    private boolean isNetworkAvailable(){
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnected();
     }
 
-    private class CheckInternetTask extends AsyncTask<String,Void, Boolean>{
+    private class CheckInternetTask extends AsyncTask<String, Void, Boolean>{
 
         @Override
         protected Boolean doInBackground(String... urls) {
-            try {
+            try{
                 HttpURLConnection urlConnection = (HttpURLConnection) new URL(urls[0]).openConnection();
                 urlConnection.setRequestMethod("HEAD");
-                urlConnection.setConnectTimeout(3000);
-                urlConnection.setReadTimeout(3000);
+                urlConnection.setConnectTimeout(1000);
+                urlConnection.setReadTimeout(1000);
                 urlConnection.connect();
                 int responseCode = urlConnection.getResponseCode();
-                return (responseCode==200);
-            }catch (IOException error) {
+
+                return (responseCode == 200);
+            } catch (IOException e){
                 return false;
             }
         }
 
         @Override
         protected void onPostExecute(Boolean result) {
-            super.onPostExecute(result);
-            if (result) {
-                statusText.setText("Connect to Google successfully!");
-            } else {
-                statusText.setText("Connect to Google failed!");
-
+            if(result){
+                statusText.setText("ket noi voi google thanh cong");
+            }else{
+                statusText.setText("khong the ket noi voi gg");
             }
         }
     }
+
 }
