@@ -22,7 +22,7 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
-    private EditText edtCurrency;
+    private EditText edtCurrency, edtAmount;
     private TextView txtResult;
     private Button btnConvert;
     private static final String API_KEY = "08d617f260035a0613c8f10e";
@@ -34,22 +34,28 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         edtCurrency = findViewById(R.id.edtCurrency);
+        edtAmount = findViewById(R.id.edtAmount);
         txtResult = findViewById(R.id.txtResult);
         btnConvert = findViewById(R.id.btnConvert);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-
         btnConvert.setOnClickListener(v -> {
             String currencyCode = edtCurrency.getText().toString().toUpperCase().trim();
-            if (!currencyCode.isEmpty()) {
-                new ConvertCurrencyTask(txtResult, currencyCode).execute();
-            } else {
+            String amountStr = edtAmount.getText().toString().trim();
+
+            if (currencyCode.isEmpty()) {
                 txtResult.setText("Enter a valid currency code.");
+                return;
             }
+
+            double amount;
+            try {
+                amount = Double.parseDouble(amountStr);
+            } catch (NumberFormatException e) {
+                txtResult.setText("Enter a valid amount.");
+                return;
+            }
+
+            new ConvertCurrencyTask(txtResult, currencyCode, amount).execute();
         });
     }
 
@@ -57,10 +63,12 @@ public class MainActivity extends AppCompatActivity {
         private static final String API_KEY = "08d617f260035a0613c8f10e";
         private final TextView txtResult;
         private final String currencyCode;
+        private final double amount;
 
-        ConvertCurrencyTask(TextView txtResult, String currencyCode) {
+        ConvertCurrencyTask(TextView txtResult, String currencyCode, double amount) {
             this.txtResult = txtResult;
             this.currencyCode = currencyCode;
+            this.amount = amount;
         }
 
         @Override
@@ -106,7 +114,8 @@ public class MainActivity extends AppCompatActivity {
                 JSONObject rates = jsonObject.getJSONObject("conversion_rates");
                 if (rates.has(currencyCode)) {
                     double rate = rates.getDouble(currencyCode);
-                    txtResult.setText("1 USD = " + rate + " " + currencyCode);
+                    double convertedAmount = amount * rate;
+                    txtResult.setText(amount + " USD = " + convertedAmount + " " + currencyCode);
                 } else {
                     txtResult.setText("Invalid currency code");
                 }
